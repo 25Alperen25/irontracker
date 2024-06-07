@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523483187443",
+    "project_id": "ema-iron-tracker",
+    "storage_bucket": "ema-iron-tracker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523483187443:android:f45db5ce415fb1d5194f86",
+        "android_client_info": {
+          "package_name": "com.example.irontracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0YitF5xH0PxMwZCnGNNO22lK5bEVYm8k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
