@@ -3,6 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:logger/logger.dart';
+
+final logger = Logger();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/Logo-fixed.jpg'), 
+              Image.asset('assets/Logo-fixed.jpg'),
               const SizedBox(height: 20),
               const Text(
                 'The only APP you need to reach the next Level',
@@ -166,51 +169,55 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Select Day and Exercise'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String>(
-                value: selectedDay,
-                items: _trainingDays.keys.map((String day) {
-                  return DropdownMenuItem<String>(
-                    value: day,
-                    child: Text(day),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedDay = newValue!;
-                  });
-                },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Select Day and Exercise'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButton<String>(
+                    value: selectedDay,
+                    items: _trainingDays.keys.map((String day) {
+                      return DropdownMenuItem<String>(
+                        value: day,
+                        child: Text(day),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedDay = newValue!;
+                      });
+                    },
+                  ),
+                  DropdownButton<String>(
+                    value: selectedExercise,
+                    items: ['Fitnessstudio', 'Joggen', 'Kampfsport', 'Meditation']
+                        .map((String exercise) {
+                      return DropdownMenuItem<String>(
+                        value: exercise,
+                        child: Text(exercise),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedExercise = newValue!;
+                      });
+                    },
+                  ),
+                ],
               ),
-              DropdownButton<String>(
-                value: selectedExercise,
-                items: ['Fitnessstudio', 'Joggen', 'Kampfsport', 'Meditation']
-                    .map((String exercise) {
-                  return DropdownMenuItem<String>(
-                    value: exercise,
-                    child: Text(exercise),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedExercise = newValue!;
-                  });
-                },
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                _addExercise(selectedDay, selectedExercise);
-                Navigator.pop(context);
-              },
-              child: const Text('Add'),
-            ),
-          ],
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    _addExercise(selectedDay, selectedExercise);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -303,7 +310,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         onTap: (index) {
-          // Handle bottom navigation bar tap
           if (index == 1) {
             setState(() {
               _trainingDays.forEach((day, exercises) {
@@ -439,7 +445,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
       } else {
-        print('No image selected.');
+        logger.e('No image selected.');
       }
     });
   }
@@ -456,7 +462,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: _image != null ? FileImage(_image!) : AssetImage('assets/Profil.jpg') as ImageProvider,
+              backgroundImage: _image != null ? FileImage(_image!) : const AssetImage('assets/Profil.jpg') as ImageProvider,
             ),
             const SizedBox(height: 20),
             const Text('Alperen Kürücü'),
