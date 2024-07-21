@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 final logger = Logger();
 
@@ -16,6 +17,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _image;
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> _addProfilePicture() async {
     final picker = ImagePicker();
@@ -28,6 +30,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         logger.e('No image selected.');
       }
     });
+  }
+
+  void _logout() async {
+    await _auth.signOut();
+    Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false);
   }
 
   @override
@@ -78,9 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
             const Text('Everyday is a new day to improve WHO YOU ARE!!!'),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: _logout,
               child: const Text('Log out'),
             ),
           ],

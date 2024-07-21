@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -21,7 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.pushNamed(context, '/home');
     } catch (e) {
-      print('Failed to sign in: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to sign in: $e')),
+      );
     }
   }
 
