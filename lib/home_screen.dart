@@ -39,11 +39,25 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     }
+
+    // Fetch days trained
+    DocumentSnapshot userDoc = await _firebaseService.getUser(userId);
+    if (userDoc.exists && (userDoc.data() as Map<String, dynamic>?)!.containsKey('daysTrained')) {
+      setState(() {
+        _daysTrained = userDoc['daysTrained'];
+      });
+    }
   }
 
   void _incrementCounter() {
     setState(() {
       _daysTrained++;
+    });
+
+    // Save days trained to Firestore
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    _firebaseService.setUser(userId, {
+      'daysTrained': _daysTrained,
     });
   }
 
@@ -51,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _trainingDays[day]!.add(exercise);
     });
-    _firebaseService.updateDailyProgress(FirebaseAuth.instance.currentUser!.uid, day, {
+    _firebaseService.setDailyProgress(FirebaseAuth.instance.currentUser!.uid, day, {
       'exercises': _trainingDays[day],
     });
   }
@@ -60,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _trainingDays[day]!.removeAt(index);
     });
-    _firebaseService.updateDailyProgress(FirebaseAuth.instance.currentUser!.uid, day, {
+    _firebaseService.setDailyProgress(FirebaseAuth.instance.currentUser!.uid, day, {
       'exercises': _trainingDays[day],
     });
   }

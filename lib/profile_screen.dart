@@ -22,6 +22,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseService _firebaseService = FirebaseService();
 
+  
+  String _email = '';
+
   @override
   void initState() {
     super.initState();
@@ -31,9 +34,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUserProfile() async {
     try {
       String userId = _auth.currentUser!.uid;
+      User? user = _auth.currentUser;
+      if (user != null) {
+        _email = user.email!;
+      }
       DocumentSnapshot userDoc = await _firebaseService.getUser(userId);
       if (userDoc.exists) {
         setState(() {
+          
           _weightController.text = userDoc['weight'].toString();
           _heightController.text = userDoc['height'].toString();
         });
@@ -100,8 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundImage: _image != null ? FileImage(_image!) : const AssetImage('assets/Profil.jpg') as ImageProvider,
             ),
             const SizedBox(height: 20),
-            const Text('Alperen Kürücü'),
-            const Text('alperen.kurucu16@gmx.de'),
+            Text(_email, style: const TextStyle(fontSize: 16)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
               child: Column(

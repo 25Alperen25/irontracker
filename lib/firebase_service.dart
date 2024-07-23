@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
 
   Future<void> addUser(String userId, String email, String username, double height, double weight) {
     return _firestore.collection('users').doc(userId).set({
@@ -20,16 +18,12 @@ class FirebaseService {
     });
   }
 
- 
-
   Future<DocumentSnapshot> getDailyProgress(String userId, String day) {
     return _firestore.collection('users').doc(userId).collection('daily_progress').doc(day).get();
   }
 
-
-
-  Future<void> updateDailyProgress(String userId, String day, Map<String, dynamic> data) {
-    return _firestore.collection('users').doc(userId).collection('daily_progress').doc(day).update(data);
+  Future<void> setDailyProgress(String userId, String day, Map<String, dynamic> data) {
+    return _firestore.collection('users').doc(userId).collection('daily_progress').doc(day).set(data, SetOptions(merge: true));
   }
 
   Future<void> deleteUser(String userId) {
@@ -40,9 +34,7 @@ class FirebaseService {
     return _firestore.collection('users').doc(userId).collection('daily_progress').doc(day).delete();
   }
 
-
-
- Future<void> setUser(String userId, Map<String, dynamic> data) async {
+  Future<void> setUser(String userId, Map<String, dynamic> data) async {
     try {
       await _firestore.collection('users').doc(userId).set(data, SetOptions(merge: true));
       print("User data updated successfully");
