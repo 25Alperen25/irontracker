@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_service.dart';
 
 final logger = Logger();
 
@@ -18,6 +20,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseService _firebaseService = FirebaseService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      String userId = _auth.currentUser!.uid;
+      DocumentSnapshot userDoc = await _firebaseService.getUser(userId);
+      if (userDoc.exists) {
+        setState(() {
+          _weightController.text = userDoc['weight'].toString();
+          _heightController.text = userDoc['height'].toString();
+        });
+      }
+    } catch (e) {
+      logger.e("Failed to load user profile: $e");
+    }
+  }
 
   Future<void> _addProfilePicture() async {
     final picker = ImagePicker();
@@ -35,6 +59,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _logout() async {
     await _auth.signOut();
     Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false);
+  }
+
+  void _saveProfile() async {
+    try {
+      String userId = _auth.currentUser!.uid;
+      double height = double.tryParse(_heightController.text) ?? 0;
+      double weight = double.tryParse(_weightController.text) ?? 0;
+
+      logger.i('Saving profile data: height=$height, weight=$weight');
+      
+      await _firebaseService.setUser(userId, {
+        'height': height,
+        'weight': weight,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile: $e')),
+      );
+      logger.e("Failed to update profile: $e");
+    }
   }
 
   @override
@@ -83,7 +131,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Text('Add Profile Picture'),
             ),
             const SizedBox(height: 20),
-            const Text('Everyday is a new day to improve WHO YOU ARE!!!'),
+            ElevatedButton(
+              onPressed: _saveProfile,
+              child: const Text('Save Profile'),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _logout,
               child: const Text('Log out'),

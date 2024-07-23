@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final FirebaseService _firebaseService = FirebaseService();
   int _daysTrained = 0;
   final Map<String, List<String>> _trainingDays = {
     'Monday': ['Squats', 'Butterfly', 'Bench Press', 'Bicep Curls', 'Triceps Cable'],
@@ -19,6 +23,24 @@ class _HomeScreenState extends State<HomeScreen> {
     'Sunday': [],
   };
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchDailyProgress();
+  }
+
+  Future<void> _fetchDailyProgress() async {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    for (String day in _trainingDays.keys) {
+      DocumentSnapshot snapshot = await _firebaseService.getDailyProgress(userId, day);
+      if (snapshot.exists) {
+        setState(() {
+          _trainingDays[day] = List<String>.from(snapshot['exercises']);
+        });
+      }
+    }
+  }
+
   void _incrementCounter() {
     setState(() {
       _daysTrained++;
@@ -29,11 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _trainingDays[day]!.add(exercise);
     });
+    _firebaseService.updateDailyProgress(FirebaseAuth.instance.currentUser!.uid, day, {
+      'exercises': _trainingDays[day],
+    });
   }
 
   void _deleteExercise(String day, int index) {
     setState(() {
       _trainingDays[day]!.removeAt(index);
+    });
+    _firebaseService.updateDailyProgress(FirebaseAuth.instance.currentUser!.uid, day, {
+      'exercises': _trainingDays[day],
     });
   }
 
@@ -106,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const CircleAvatar(
-              backgroundImage: AssetImage('assets/Profil.jpg'), // Assuming you have a profile picture asset
+              backgroundImage: AssetImage('assets/Profil.jpg'),
             ),
             onPressed: () {
               Navigator.pushNamed(context, '/profile');
